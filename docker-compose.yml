@@ -1,0 +1,18 @@
+version: "3"
+
+services:
+  go-backend:
+    image: cdpxlinuxtest.azurecr.io/user/networking-appgw/networking-appgw:1.15
+    build:
+      dockerfile: docker/Dockerfile-small
+      context: .
+    security_opt:
+      - seccomp:unconfined
+    ports:
+      - 8086:8080
+    entrypoint: /app/gobackend
+    environment:
+      - PORT=8080
+    cap_add:
+      - SYS_PTRACE
+      - NET_ADMIN
