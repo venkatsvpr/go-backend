@@ -5,7 +5,7 @@ ENV SOURCES /go/src/github.com/venkatsvpr/go-backend
 COPY . ${SOURCES}
 RUN cd ${SOURCES} && CGO_ENABLED=0 go install
 
-ENV PORT 8080
-EXPOSE 8080
+ENV PORT 8086
+EXPOSE 8086
 
 ENTRYPOINT  go-backend
