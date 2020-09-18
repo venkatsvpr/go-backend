@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -37,13 +38,15 @@ func summaryHandler(w http.ResponseWriter, r *http.Request) {
 
 func printSummary(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Test Backend ")
-	fmt.Fprintf(w, "RequestURI :  %q\r\n", r.URL.RequestURI())
-	fmt.Fprintf(w, "Query :  %+v\r\n", r.URL.Query())
+	fmt.Fprintf(w, "RequestURI : %q\r\n", r.URL.RequestURI())
+	jsonURI, _ := json.Marshal(r.URL.Query())
+	fmt.Fprintln(w, "Query : \r\n"+string(jsonURI))
 	fmt.Fprintf(w, "EscapedPath : %q\r\n", r.URL.EscapedPath())
 	fmt.Fprintf(w, "URLString : %q\r\n", r.URL.String())
 	fmt.Fprintf(w, "Port :  %q\r\n", r.URL.Port())
 	fmt.Fprintf(w, "HostName :  %q\r\n", r.URL.Hostname())
-	fmt.Fprintf(w, "Header : %+v\r\n", r.Header.Clone())
+	jsonHeader, _ := json.Marshal(r.Header)
+	fmt.Fprintln(w, "Header : \r\n"+string(jsonHeader))
 }
 
 func getDelay(r *http.Request) (delayInMsec, sizeInBytes int) {
@@ -106,11 +109,10 @@ func httpRequestHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func helpHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Help")
-	fmt.Fprintln(w, "Endpoints")
+	fmt.Fprintln(w, "/         - Echo + return random content for the specified size ")
 	fmt.Fprintln(w, "/echo     - Echo the request  ")
 	fmt.Fprintln(w, "/summary  - Summarize the request ")
-	fmt.Fprintln(w, "Optional Endpoints")
+	fmt.Fprintln(w, "Optional Endpoints:")
 	fmt.Fprintln(w, "/delay/<integer>   - Generate a server delay of <integer> msec ")
 	fmt.Fprintln(w, "/size/<integer>    - Specify the size of the response in bytes ")
 }
