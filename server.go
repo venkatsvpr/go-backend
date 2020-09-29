@@ -49,6 +49,59 @@ func printSummary(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Header : \r\n"+string(jsonHeader))
 }
 
+// venkat: TODO have to rewrite this
+func getArgs(r *http.Request) map[string]string {
+	params := make(map[string]string)
+	escapedPath := r.URL.EscapedPath()
+	splitBySlash := strings.Split(escapedPath, "/")
+	readDelay, readSize, readCode := false, false, false
+	params["delay"] = "10"
+	params["size"] = "1000"
+	params["code"] = "200"
+	for _, element := range splitBySlash {
+		if readDelay {
+			_, err := strconv.Atoi(element)
+			if err == nil {
+				params["delay"] = element
+			}
+			readDelay = false
+			continue
+		}
+
+		if readSize {
+			_, err := strconv.Atoi(element)
+			if err == nil {
+				params["size"] = element
+			}
+			readSize = false
+			continue
+		}
+
+		if readCode {
+			_, err := strconv.Atoi(element)
+			if err == nil {
+				params["code"] = element
+			}
+			readCode = false
+			continue
+		}
+
+		if element == "size" {
+			readSize = true
+		}
+
+		if element == "delay" {
+			readDelay = true
+		}
+
+		if element == "code" {
+			readCode = true
+		}
+	}
+
+	return params
+}
+
 func getDelay(r *http.Request) (delayInMsec, sizeInBytes int) {
 	escapedPath := r.URL.EscapedPath()
 	splitBySlash := strings.Split(escapedPath, "/")
@@ -112,9 +165,19 @@ func helpHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "/         - Echo + return random content for the specified size ")
 	fmt.Fprintln(w, "/echo     - Echo the request  ")
 	fmt.Fprintln(w, "/summary  - Summarize the request ")
+	fmt.Fprintln(w, "/code/[400,500,502] - Get the specified httpStatusCode from backend ")
 	fmt.Fprintln(w, "Optional Endpoints:")
 	fmt.Fprintln(w, "/delay/<integer>   - Generate a server delay of <integer> msec ")
 	fmt.Fprintln(w, "/size/<integer>    - Specify the size of the response in bytes ")
+}
+
+func httpCodeHandler(w http.ResponseWriter, r *http.Request) {
+	argPassed := getArgs(r)
+	delay, _ := strconv.Atoi(argPassed["delay"])
+	time.Sleep(time.Duration(delay) * time.Millisecond)
+	code, _ := strconv.Atoi(argPassed["code"])
+	w.WriteHeader(code)
+	w.Write([]byte(fmt.Sprintf(" Requested StatusCode : %d", code)))
 }
 
 func port() string {
@@ -130,6 +193,7 @@ func main() {
 	http.HandleFunc("/help/", helpHandler)
 	http.HandleFunc("/echo/", echoHandler)
 	http.HandleFunc("/summary/", summaryHandler)
+	http.HandleFunc("/code/", httpCodeHandler)
 	http.HandleFunc("/", httpRequestHandler)
 	if err := http.ListenAndServe(port(), nil); err != nil {
 		panic(err)
