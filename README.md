@@ -1,8 +1,2 @@
 # go-backend
-backend on the go
-/         - Echo + return random content for the specified size
-/echo     - Echo the request
-/summary  - Summarize the request
-/code/[400,500,502] - Get the specified httpStatusCode from backend 
-/delay/<integer>   - Generate a server delay of <integer> msec 
-/size/<integer>    - Specify the size of the response in bytes 
+![image](https://user-images.githubusercontent.com/4478054/143507815-f4b46205-c5d5-4faf-932d-a0dbe07718d1.png)
